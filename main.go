@@ -64,6 +64,9 @@ func generatePrompt(theme string, style string, modifier string) string {
 	if modifier == "" && rand.Float32() > 0.5 {
 		modifier = randomLinesFromFile(ContentModifiersFilePath, 1)[0]
 	}
+	if modifier != "" {
+		modifier = " " + modifier
+	}
 
 	// Build and output query
 	return fmt.Sprintf(promptFormatString, theme, modifier, style)
@@ -144,6 +147,7 @@ func main() {
 			},
 			&cli.BoolFlag{
 				Name:     "showPrompt",
+				Aliases:  []string{"p"},
 				Value:    false,
 				Usage:    "If true, shows the generated prompt alongside the story",
 				Required: false,
