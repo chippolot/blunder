@@ -54,20 +54,21 @@ func randomLinesFromFile(filePath string, num int) []string {
 }
 
 func generateQuery() string {
-	const templateFormatString = "Describe to me a highly comical situation stemming from a misunderstanding. " +
-		"The misunderstanding should be about the theme of '%v' %v. Limit the description to 500 characters."
+	const promptFormatString = "Describe to me a highly comical situation stemming from a misunderstanding. " +
+		"The theme should be '%v'%v. Write the description in the style of %v and limit the length to 500 characters."
 
 	// Get a random word
 	word := randomLinesFromFile(NounsFilePath, 1)[0]
 
 	// Get some random modifiers
-	modifiers := randomLinesFromFile(StyleModifiersFilePath, 1)[0]
+	styleModifier := randomLinesFromFile(StyleModifiersFilePath, 1)[0]
+	contentModifier := ""
 	if rand.Float32() > 0.5 {
-		modifiers += " and " + randomLinesFromFile(ContentModifiersFilePath, 1)[0]
+		contentModifier = randomLinesFromFile(ContentModifiersFilePath, 1)[0]
 	}
 
 	// Build and output query
-	return fmt.Sprintf(templateFormatString, word, modifiers)
+	return fmt.Sprintf(promptFormatString, word, contentModifier, styleModifier)
 }
 
 func queryLLM(token string, query string) (string, error) {
