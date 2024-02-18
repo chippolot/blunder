@@ -98,8 +98,8 @@ func main() {
 	query := generateQuery()
 
 	// Print the query
-	fmt.Println("Query:")
-	fmt.Println(query)
+	// fmt.Println("Query:")
+	// fmt.Println(query)
 
 	// Get secret key
 	openAIToken, err := getEnvVariable("OPEN_AI_API_KEY")
@@ -115,7 +115,7 @@ func main() {
 	}
 
 	// Print the result
-	fmt.Println()
-	fmt.Println("Story:")
+	// fmt.Println()
+	// fmt.Println("Story:")
 	fmt.Println(result)
 }
