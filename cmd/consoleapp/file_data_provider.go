@@ -2,20 +2,49 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
+	"time"
 
 	"github.com/chippolot/blunders/internal/blunder"
 )
 
 const (
-	NounsFilePath     = "res/nouns.txt"
-	StylesFilePath    = "res/styles.txt"
-	ModifiersFilePath = "res/modifiers.txt"
+	NounsFilePath       = "res/nouns.txt"
+	StylesFilePath      = "res/styles.txt"
+	ModifiersFilePath   = "res/modifiers.txt"
+	CachedStoryFilePath = "recent_story.json"
 )
 
 type FileDataProvider struct {
+}
+
+func (f *FileDataProvider) AddStory(story string, prompt string) {
+	result := &blunder.StoryResult{
+		Story:     story,
+		Prompt:    prompt,
+		Timestamp: time.Now().UTC(),
+	}
+	file, _ := os.Create(CachedStoryFilePath)
+	defer file.Close()
+	json.NewEncoder(file).Encode(result)
+}
+
+func (f *FileDataProvider) GetMostRecentStory() (blunder.StoryResult, error) {
+	file, err := os.Open(CachedStoryFilePath)
+	if err != nil {
+		return blunder.StoryResult{}, err
+	}
+	defer file.Close()
+
+	var result blunder.StoryResult
+	if err := json.NewDecoder(file).Decode(&result); err != nil {
+		return blunder.StoryResult{}, err
+	}
+
+	return result, nil
 }
 
 func (f *FileDataProvider) GetRandomString(dataType blunder.StoryDataType) (string, error) {

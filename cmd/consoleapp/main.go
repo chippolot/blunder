@@ -48,14 +48,22 @@ func main() {
 				Usage:    "If true, shows the generated prompt alongside the story",
 				Required: false,
 			},
+			&cli.BoolFlag{
+				Name:     "forceRegenerate",
+				Aliases:  []string{"f"},
+				Value:    false,
+				Usage:    "If true, the story will always be regerated, even if a valid cached story exists",
+				Required: false,
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			token := ctx.String("token")
 			showPrompt := ctx.Bool("showPrompt")
 			options := blunder.StoryOptions{
-				Theme:    ctx.String("theme"),
-				Style:    ctx.String("style"),
-				Modifier: ctx.String("modifier"),
+				Theme:           ctx.String("theme"),
+				Style:           ctx.String("style"),
+				Modifier:        ctx.String("modifier"),
+				ForceRegenerate: ctx.Bool("forceRegenerate"),
 			}
 			dataProvider := &FileDataProvider{}
 			result, err := blunder.GenerateStory(token, dataProvider, options)

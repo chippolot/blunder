@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -15,19 +16,23 @@ const (
 )
 
 type StoryOptions struct {
-	Theme    string
-	Style    string
-	Modifier string
+	Theme           string
+	Style           string
+	Modifier        string
+	ForceRegenerate bool
 }
 
 type StoryResult struct {
-	Prompt string
-	Story  string
+	Timestamp time.Time
+	Prompt    string
+	Story     string
 }
 
 type StoryDataType int
 
 type StoryDataProvider interface {
+	AddStory(story string, prompt string)
+	GetMostRecentStory() (StoryResult, error)
 	GetRandomString(dataType StoryDataType) (string, error)
 }
 
@@ -94,6 +99,18 @@ func queryLLM(token string, prompt string) (string, error) {
 }
 
 func GenerateStory(openAIToken string, dataProvider StoryDataProvider, options StoryOptions) (StoryResult, error) {
+	// Check for cached story
+	if !options.ForceRegenerate {
+		now := time.Now().UTC()
+		cached, err := dataProvider.GetMostRecentStory()
+		if err == nil {
+			cacheDuration := now.Sub(cached.Timestamp)
+			if cacheDuration < time.Hour*24 {
+				return cached, nil
+			}
+		}
+	}
+
 	// Generate query
 	prompt, err := generatePrompt(dataProvider, options)
 	if err != nil {
@@ -106,8 +123,12 @@ func GenerateStory(openAIToken string, dataProvider StoryDataProvider, options S
 		return StoryResult{}, err
 	}
 
+	// Cache story
+	dataProvider.AddStory(story, prompt)
+
 	return StoryResult{
-		Prompt: prompt,
-		Story:  story,
+		Prompt:    prompt,
+		Story:     story,
+		Timestamp: time.Now().UTC(),
 	}, nil
 }
