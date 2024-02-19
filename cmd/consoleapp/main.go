@@ -65,7 +65,10 @@ func main() {
 				Modifier:        ctx.String("modifier"),
 				ForceRegenerate: ctx.Bool("forceRegenerate"),
 			}
+
 			dataProvider := &FileDataProvider{}
+			defer dataProvider.Close()
+
 			result, err := blunder.GenerateStory(token, dataProvider, options)
 			if err != nil {
 				return err

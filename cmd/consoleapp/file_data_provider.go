@@ -21,15 +21,25 @@ const (
 type FileDataProvider struct {
 }
 
-func (f *FileDataProvider) AddStory(story string, prompt string) {
+func (f *FileDataProvider) AddStory(story string, prompt string) error {
 	result := &blunder.StoryResult{
 		Story:     story,
 		Prompt:    prompt,
 		Timestamp: time.Now().UTC(),
 	}
-	file, _ := os.Create(CachedStoryFilePath)
+
+	file, err := os.Create(CachedStoryFilePath)
+	if err != nil {
+		return err
+	}
 	defer file.Close()
-	json.NewEncoder(file).Encode(result)
+
+	err = json.NewEncoder(file).Encode(result)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (f *FileDataProvider) GetMostRecentStory() (blunder.StoryResult, error) {
@@ -58,6 +68,10 @@ func (f *FileDataProvider) GetRandomString(dataType blunder.StoryDataType) (stri
 	}
 	randomIndex := rand.Intn(len(lines))
 	return lines[randomIndex], nil
+}
+
+func (f *FileDataProvider) Close() error {
+	return nil
 }
 
 func getFilePath(dataType blunder.StoryDataType) (string, error) {

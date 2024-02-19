@@ -31,9 +31,10 @@ type StoryResult struct {
 type StoryDataType int
 
 type StoryDataProvider interface {
-	AddStory(story string, prompt string)
+	AddStory(story string, prompt string) error
 	GetMostRecentStory() (StoryResult, error)
 	GetRandomString(dataType StoryDataType) (string, error)
+	Close() error
 }
 
 func generatePrompt(dataProvider StoryDataProvider, options StoryOptions) (string, error) {
@@ -124,7 +125,10 @@ func GenerateStory(openAIToken string, dataProvider StoryDataProvider, options S
 	}
 
 	// Cache story
-	dataProvider.AddStory(story, prompt)
+	err = dataProvider.AddStory(story, prompt)
+	if err != nil {
+		return StoryResult{}, err
+	}
 
 	return StoryResult{
 		Prompt:    prompt,
