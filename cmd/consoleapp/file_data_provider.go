@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	NounsFilePath     = "../../res/nouns.txt"
-	StylesFilePath    = "../../res/styles.txt"
-	ModifiersFilePath = "../../res/modifiers.txt"
+	NounsFilePath     = "res/nouns.txt"
+	StylesFilePath    = "res/styles.txt"
+	ModifiersFilePath = "res/modifiers.txt"
 )
 
 type FileDataProvider struct {
