@@ -1,4 +1,4 @@
-module github.com/chippolot/blunder
+module github.com/chippolot/jokegen
 
 go 1.21.7
 
