@@ -1,4 +1,4 @@
-module github.com/chippolot/blunders
+module github.com/chippolot/blunder
 
 go 1.21.7
 
