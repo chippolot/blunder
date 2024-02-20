@@ -5,15 +5,15 @@ import (
 	"log"
 	"os"
 
-	"github.com/chippolot/blunders/internal/blunder"
+	"github.com/chippolot/jokegen"
 	"github.com/urfave/cli/v2"
 )
 
 func main() {
 
 	app := &cli.App{
-		Name:  "blunderbuddy",
-		Usage: "generate a comical story of a misundertanding!",
+		Name:  "jokegen",
+		Usage: "generates a comical story",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "token",
@@ -22,6 +22,13 @@ func main() {
 				Usage:    "OpenAI token",
 				Required: false,
 				EnvVars:  []string{"OPEN_AI_API_KEY"},
+			},
+			&cli.StringFlag{
+				Name:     "storyType",
+				Aliases:  []string{"s"},
+				Value:    "",
+				Usage:    "Story type: [misunderstanding, slapstick]",
+				Required: true,
 			},
 			&cli.StringFlag{
 				Name:     "theme",
@@ -59,17 +66,23 @@ func main() {
 		Action: func(ctx *cli.Context) error {
 			token := ctx.String("token")
 			showPrompt := ctx.Bool("showPrompt")
-			options := blunder.StoryOptions{
+			options := jokegen.StoryOptions{
 				Theme:           ctx.String("theme"),
 				Style:           ctx.String("style"),
 				Modifier:        ctx.String("modifier"),
 				ForceRegenerate: ctx.Bool("forceRegenerate"),
 			}
 
+			storyTypeString := ctx.String("storyType")
+			storyType, err := jokegen.ParseStoryType(storyTypeString)
+			if err != nil {
+				return err
+			}
+
 			dataProvider := &FileDataProvider{}
 			defer dataProvider.Close()
 
-			result, err := blunder.GenerateStory(token, dataProvider, options)
+			result, err := jokegen.GenerateStory(token, storyType, dataProvider, options)
 			if err != nil {
 				return err
 			}

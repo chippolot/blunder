@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/chippolot/blunders/internal/blunder"
+	"github.com/chippolot/jokegen"
 )
 
 const (
@@ -21,8 +21,8 @@ const (
 type FileDataProvider struct {
 }
 
-func (f *FileDataProvider) AddStory(story string, prompt string) error {
-	result := &blunder.StoryResult{
+func (f *FileDataProvider) AddStory(story, prompt string, storyType jokegen.StoryType) error {
+	result := &jokegen.StoryResult{
 		Story:     story,
 		Prompt:    prompt,
 		Timestamp: time.Now().UTC(),
@@ -42,22 +42,22 @@ func (f *FileDataProvider) AddStory(story string, prompt string) error {
 	return nil
 }
 
-func (f *FileDataProvider) GetMostRecentStory() (blunder.StoryResult, error) {
+func (f *FileDataProvider) GetMostRecentStory(storyType jokegen.StoryType) (jokegen.StoryResult, error) {
 	file, err := os.Open(CachedStoryFilePath)
 	if err != nil {
-		return blunder.StoryResult{}, err
+		return jokegen.StoryResult{}, err
 	}
 	defer file.Close()
 
-	var result blunder.StoryResult
+	var result jokegen.StoryResult
 	if err := json.NewDecoder(file).Decode(&result); err != nil {
-		return blunder.StoryResult{}, err
+		return jokegen.StoryResult{}, err
 	}
 
 	return result, nil
 }
 
-func (f *FileDataProvider) GetRandomString(dataType blunder.StoryDataType) (string, error) {
+func (f *FileDataProvider) GetRandomString(dataType jokegen.StoryDataType) (string, error) {
 	filePath, err := getFilePath(dataType)
 	if err != nil {
 		return "", err
@@ -74,13 +74,13 @@ func (f *FileDataProvider) Close() error {
 	return nil
 }
 
-func getFilePath(dataType blunder.StoryDataType) (string, error) {
+func getFilePath(dataType jokegen.StoryDataType) (string, error) {
 	switch dataType {
-	case blunder.Themes:
+	case jokegen.Themes:
 		return NounsFilePath, nil
-	case blunder.Styles:
+	case jokegen.Styles:
 		return StylesFilePath, nil
-	case blunder.Modifiers:
+	case jokegen.Modifiers:
 		return ModifiersFilePath, nil
 	}
 	return "", fmt.Errorf("unknown data type: %v", dataType)

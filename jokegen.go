@@ -1,4 +1,4 @@
-package blunder
+package jokegen
 
 import (
 	"context"
@@ -10,9 +10,14 @@ import (
 )
 
 const (
+	// Story data types
 	Themes StoryDataType = iota
 	Styles
 	Modifiers
+
+	// Story types
+	Misunderstanding StoryType = iota
+	Slapstick
 )
 
 type StoryOptions struct {
@@ -29,19 +34,42 @@ type StoryResult struct {
 }
 
 type StoryDataType int
+type StoryType int
+
+func ParseStoryType(str string) (StoryType, error) {
+	switch str {
+	case "misunderstanding":
+		return Misunderstanding, nil
+	case "slapstick":
+		return Slapstick, nil
+	}
+	return -1, fmt.Errorf("unknown story type: %v", str)
+}
 
 type StoryDataProvider interface {
-	AddStory(story string, prompt string) error
-	GetMostRecentStory() (StoryResult, error)
+	AddStory(story string, prompt string, storyType StoryType) error
+	GetMostRecentStory(storyType StoryType) (StoryResult, error)
 	GetRandomString(dataType StoryDataType) (string, error)
 	Close() error
 }
 
-func generatePrompt(dataProvider StoryDataProvider, options StoryOptions) (string, error) {
-	const promptFormatString = "Describe to me a highly comical situation stemming from a misunderstanding. " +
-		"The theme should be '%v'%v. Write the description in the style of %v and limit the length to 500 characters."
+func getPrompt(storyType StoryType) (string, error) {
+	const postfix string = "The theme should be '%v'%v. Write the description in the style of %v and limit the length to 500 characters."
 
-	var err error = nil
+	switch storyType {
+	case Misunderstanding:
+		return "Describe to me a highly comical situation stemming from a misunderstanding. " + postfix, nil
+	case Slapstick:
+		return "Describe to me a highly comical situation revolving around slapstick humor, using florid language to describe the action. " + postfix, nil
+	}
+	return "", fmt.Errorf("unknown story type %v", storyType)
+}
+
+func generatePrompt(storyType StoryType, dataProvider StoryDataProvider, options StoryOptions) (string, error) {
+	promptFormatString, err := getPrompt(storyType)
+	if err != nil {
+		return "", err
+	}
 
 	// Get a random theme
 	theme := options.Theme
@@ -99,11 +127,11 @@ func queryLLM(token string, prompt string) (string, error) {
 	return resp.Choices[0].Message.Content, nil
 }
 
-func GenerateStory(openAIToken string, dataProvider StoryDataProvider, options StoryOptions) (StoryResult, error) {
+func GenerateStory(openAIToken string, storyType StoryType, dataProvider StoryDataProvider, options StoryOptions) (StoryResult, error) {
 	// Check for cached story
 	if !options.ForceRegenerate {
 		now := time.Now().UTC()
-		cached, err := dataProvider.GetMostRecentStory()
+		cached, err := dataProvider.GetMostRecentStory(storyType)
 		if err == nil {
 			cacheDuration := now.Sub(cached.Timestamp)
 			if cacheDuration < time.Hour*24 {
@@ -113,7 +141,7 @@ func GenerateStory(openAIToken string, dataProvider StoryDataProvider, options S
 	}
 
 	// Generate query
-	prompt, err := generatePrompt(dataProvider, options)
+	prompt, err := generatePrompt(storyType, dataProvider, options)
 	if err != nil {
 		return StoryResult{}, err
 	}
@@ -125,7 +153,7 @@ func GenerateStory(openAIToken string, dataProvider StoryDataProvider, options S
 	}
 
 	// Cache story
-	err = dataProvider.AddStory(story, prompt)
+	err = dataProvider.AddStory(story, prompt, storyType)
 	if err != nil {
 		return StoryResult{}, err
 	}
