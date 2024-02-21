@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"time"
 
+	utils "github.com/chippolot/jokegen/internal"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -17,6 +18,8 @@ import (
 //go:embed res/slapstick/modifiers.txt
 var ResourcesFS embed.FS
 
+type StoryDataType int
+
 const (
 	// Story data types
 	Themes StoryDataType = iota
@@ -24,12 +27,36 @@ const (
 	Modifiers
 )
 
+type StoryType int
+
 const (
 	// Story types
 	Misunderstanding StoryType = 1 << iota
 	Slapstick
-	Hex
+	Curse
+	Creature
 )
+
+var storyTypeStringMapping = utils.NewStringMapping[StoryType](map[StoryType]string{
+	Misunderstanding: "misunderstanding",
+	Slapstick:        "slapstick",
+	Curse:            "curse",
+	Creature:         "creature",
+})
+
+func ParseStoryType(str string) (StoryType, error) {
+	if val, ok := storyTypeStringMapping.ToValue[str]; ok {
+		return val, nil
+	}
+	return 0, fmt.Errorf("unknown story type: %s", str)
+}
+
+func (s StoryType) ToString() (string, error) {
+	if str, ok := storyTypeStringMapping.ToString[s]; ok {
+		return str, nil
+	}
+	return "", fmt.Errorf("unknown story type: %v", s)
+}
 
 type StoryOptions struct {
 	Theme           string
@@ -44,34 +71,6 @@ type StoryResult struct {
 	Story     string
 }
 
-type StoryDataType int
-type StoryType int
-
-func ParseStoryType(str string) (StoryType, error) {
-	switch str {
-	case "misunderstanding":
-		return Misunderstanding, nil
-	case "slapstick":
-		return Slapstick, nil
-	case "hex":
-		return Hex, nil
-	}
-	return -1, fmt.Errorf("unknown story type: %v", str)
-}
-
-func (s StoryType) ToString() (string, error) {
-
-	switch s {
-	case Misunderstanding:
-		return "misunderstanding", nil
-	case Slapstick:
-		return "slapstick", nil
-	case Hex:
-		return "hex", nil
-	}
-	return "", fmt.Errorf("unknown story type: %v", s)
-}
-
 type StoryDataProvider interface {
 	AddStory(story string, prompt string, storyType StoryType) error
 	GetMostRecentStory(storyType StoryType) (StoryResult, error)
@@ -80,15 +79,18 @@ type StoryDataProvider interface {
 }
 
 func getPrompt(storyType StoryType) (string, error) {
+	const prefix string = "Describe to me a highly comical situation "
 	const postfix string = "The theme should be '%v'%v. Write the description in the style of %v and limit the length to 500 characters."
 
 	switch storyType {
 	case Misunderstanding:
-		return "Describe to me a highly comical situation stemming from a misunderstanding. " + postfix, nil
+		return prefix + "stemming from a misunderstanding. " + postfix, nil
 	case Slapstick:
-		return "Describe to me a highly comical situation revolving around slapstick humor, using florid language to describe the action. " + postfix, nil
-	case Hex:
-		return "Describe to me a highly comical situation revolving around a curse. " + postfix, nil
+		return prefix + "revolving around slapstick humor, using florid language to describe the action. " + postfix, nil
+	case Curse:
+		return prefix + "revolving around a curse. " + postfix, nil
+	case Creature:
+		return prefix + "revolving around a unique mythical creature. " + postfix, nil
 	}
 	return "", fmt.Errorf("unknown story type %v", storyType)
 }
