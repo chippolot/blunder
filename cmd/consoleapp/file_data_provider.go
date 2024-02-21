@@ -66,6 +66,9 @@ func (f *FileDataProvider) GetRandomString(dataType jokegen.StoryDataType, story
 	if err != nil {
 		return "", err
 	}
+	if len(lines) == 0 {
+		return "", nil
+	}
 	randomIndex := rand.Intn(len(lines))
 	return lines[randomIndex], nil
 }
