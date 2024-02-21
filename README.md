@@ -19,7 +19,7 @@ JokeGen supports a few different story types:
 * Curses (`curses`)
   * Comical stories revolving around curses.
 
-# Installing Package
+## Installing Package
 
 To include JokeGen in another Go application just use `go get`:
 ```
@@ -50,7 +50,7 @@ options := jokegen.StoryOptions{}
 jokegen.GenerateStory(openAIToken, storyType, dataProvider, options)
 ```
 
-### Executing CLI program
+## Executing CLI program
 
 Build the CLI program with:
 ```
