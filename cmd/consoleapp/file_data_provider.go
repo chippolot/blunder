@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	NounsFilePath       = "res/nouns.txt"
-	StylesFilePath      = "res/styles.txt"
-	ModifiersFilePath   = "res/modifiers.txt"
+	ThemesFilePath      = "res/nouns.txt"
+	StylesFilePath      = "res/%s/styles.txt"
+	ModifiersFilePath   = "res/%s/modifiers.txt"
 	CachedStoryFilePath = "recent_story.json"
 )
 
@@ -57,8 +57,8 @@ func (f *FileDataProvider) GetMostRecentStory(storyType jokegen.StoryType) (joke
 	return result, nil
 }
 
-func (f *FileDataProvider) GetRandomString(dataType jokegen.StoryDataType) (string, error) {
-	filePath, err := getFilePath(dataType)
+func (f *FileDataProvider) GetRandomString(dataType jokegen.StoryDataType, storyType jokegen.StoryType) (string, error) {
+	filePath, err := getFilePath(dataType, storyType)
 	if err != nil {
 		return "", err
 	}
@@ -74,14 +74,19 @@ func (f *FileDataProvider) Close() error {
 	return nil
 }
 
-func getFilePath(dataType jokegen.StoryDataType) (string, error) {
+func getFilePath(dataType jokegen.StoryDataType, storyType jokegen.StoryType) (string, error) {
+	storyTypeString, err := storyType.ToString()
+	if err != nil {
+		return "", err
+	}
+
 	switch dataType {
 	case jokegen.Themes:
-		return NounsFilePath, nil
+		return ThemesFilePath, nil
 	case jokegen.Styles:
-		return StylesFilePath, nil
+		return fmt.Sprintf(StylesFilePath, storyTypeString), nil
 	case jokegen.Modifiers:
-		return ModifiersFilePath, nil
+		return fmt.Sprintf(ModifiersFilePath, storyTypeString), nil
 	}
 	return "", fmt.Errorf("unknown data type: %v", dataType)
 }

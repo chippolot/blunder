@@ -46,10 +46,21 @@ func ParseStoryType(str string) (StoryType, error) {
 	return -1, fmt.Errorf("unknown story type: %v", str)
 }
 
+func (s StoryType) ToString() (string, error) {
+
+	switch s {
+	case Misunderstanding:
+		return "misunderstanding", nil
+	case Slapstick:
+		return "slapstick", nil
+	}
+	return "", fmt.Errorf("unknown story type: %v", s)
+}
+
 type StoryDataProvider interface {
 	AddStory(story string, prompt string, storyType StoryType) error
 	GetMostRecentStory(storyType StoryType) (StoryResult, error)
-	GetRandomString(dataType StoryDataType) (string, error)
+	GetRandomString(dataType StoryDataType, storyType StoryType) (string, error)
 	Close() error
 }
 
@@ -74,7 +85,7 @@ func generatePrompt(storyType StoryType, dataProvider StoryDataProvider, options
 	// Get a random theme
 	theme := options.Theme
 	if theme == "" {
-		theme, err = dataProvider.GetRandomString(Themes)
+		theme, err = dataProvider.GetRandomString(Themes, storyType)
 		if err != nil {
 			return "", err
 		}
@@ -83,7 +94,7 @@ func generatePrompt(storyType StoryType, dataProvider StoryDataProvider, options
 	// Get a random style
 	style := options.Style
 	if style == "" {
-		style, err = dataProvider.GetRandomString(Styles)
+		style, err = dataProvider.GetRandomString(Styles, storyType)
 		if err != nil {
 			return "", err
 		}
@@ -92,7 +103,7 @@ func generatePrompt(storyType StoryType, dataProvider StoryDataProvider, options
 	// Get a random content modifier
 	modifier := options.Modifier
 	if modifier == "" && rand.Float32() > 0.5 {
-		modifier, err = dataProvider.GetRandomString(Modifiers)
+		modifier, err = dataProvider.GetRandomString(Modifiers, storyType)
 		if err != nil {
 			return "", err
 		}
