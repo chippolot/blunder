@@ -92,7 +92,7 @@ func getFilePath(dataType jokegen.StoryDataType, storyType jokegen.StoryType) (s
 }
 
 func readLines(path string) ([]string, error) {
-	file, err := os.Open(path)
+	file, err := jokegen.ResourcesFS.Open(path)
 	if err != nil {
 		return nil, err
 	}

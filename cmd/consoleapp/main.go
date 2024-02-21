@@ -25,7 +25,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:     "storyType",
-				Aliases:  []string{"t"},
+				Aliases:  []string{"st"},
 				Value:    "",
 				Usage:    "Story type",
 				Required: true,

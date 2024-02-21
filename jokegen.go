@@ -2,12 +2,20 @@ package jokegen
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"math/rand"
 	"time"
 
 	"github.com/sashabaranov/go-openai"
 )
+
+//go:embed res/nouns.txt
+//go:embed res/misunderstanding/styles.txt
+//go:embed res/misunderstanding/modifiers.txt
+//go:embed res/slapstick/modifiers.txt
+//go:embed res/slapstick/modifiers.txt
+var ResourcesFS embed.FS
 
 const (
 	// Story data types
