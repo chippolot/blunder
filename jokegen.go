@@ -22,7 +22,9 @@ const (
 	Themes StoryDataType = iota
 	Styles
 	Modifiers
+)
 
+const (
 	// Story types
 	Misunderstanding StoryType = iota
 	Slapstick
