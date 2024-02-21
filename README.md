@@ -12,12 +12,14 @@ JokeGen required an active OpenAI API key in order to generate new stories.
 ## Story Types
 
 JokeGen supports a few different story types:
-* Misunderstanding (`misunderstanding`)
+* Misunderstandings (`storyType: misunderstanding`)
   * Comical stories stemming from misunderstandings.
-* Slapstick (`slapstick`)
+* Slapsticks (`storyType: slapstick`)
   * Stories involving slapstick humor.
-* Curses (`curses`)
+* Curses (`storyType: curse`)
   * Comical stories revolving around curses.
+* Curses (`storyType: creature`)
+  * Comical stories revolving around mythical creatures.
 
 ## Installing Package
 
