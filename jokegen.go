@@ -26,8 +26,9 @@ const (
 
 const (
 	// Story types
-	Misunderstanding StoryType = iota
+	Misunderstanding StoryType = 1 << iota
 	Slapstick
+	Hex
 )
 
 type StoryOptions struct {
@@ -52,6 +53,8 @@ func ParseStoryType(str string) (StoryType, error) {
 		return Misunderstanding, nil
 	case "slapstick":
 		return Slapstick, nil
+	case "hex":
+		return Hex, nil
 	}
 	return -1, fmt.Errorf("unknown story type: %v", str)
 }
@@ -63,6 +66,8 @@ func (s StoryType) ToString() (string, error) {
 		return "misunderstanding", nil
 	case Slapstick:
 		return "slapstick", nil
+	case Hex:
+		return "hex", nil
 	}
 	return "", fmt.Errorf("unknown story type: %v", s)
 }
@@ -82,6 +87,8 @@ func getPrompt(storyType StoryType) (string, error) {
 		return "Describe to me a highly comical situation stemming from a misunderstanding. " + postfix, nil
 	case Slapstick:
 		return "Describe to me a highly comical situation revolving around slapstick humor, using florid language to describe the action. " + postfix, nil
+	case Hex:
+		return "Describe to me a highly comical situation revolving around a curse. " + postfix, nil
 	}
 	return "", fmt.Errorf("unknown story type %v", storyType)
 }
