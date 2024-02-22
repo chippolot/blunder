@@ -35,6 +35,7 @@ const (
 	Slapstick
 	Curse
 	Creature
+	AntiHumor
 )
 
 var storyTypeStringMapping = utils.NewStringMapping[StoryType](map[StoryType]string{
@@ -42,6 +43,7 @@ var storyTypeStringMapping = utils.NewStringMapping[StoryType](map[StoryType]str
 	Slapstick:        "slapstick",
 	Curse:            "curse",
 	Creature:         "creature",
+	AntiHumor:        "antihumor",
 })
 
 func ParseStoryType(str string) (StoryType, error) {
@@ -80,17 +82,19 @@ type StoryDataProvider interface {
 
 func getPrompt(storyType StoryType) (string, error) {
 	const prefix string = "Describe to me a highly comical situation "
-	const postfix string = "The theme should be '%v'%v. Write the description in the style of %v and limit the length to 500 characters."
+	const postfix string = " The theme should be '%v'%v. Write the description in the style of %v and limit the length to 500 characters."
 
 	switch storyType {
 	case Misunderstanding:
-		return prefix + "stemming from a misunderstanding. " + postfix, nil
+		return prefix + "stemming from a misunderstanding." + postfix, nil
 	case Slapstick:
-		return prefix + "revolving around slapstick humor, using florid language to describe the action. " + postfix, nil
+		return prefix + "revolving around slapstick humor, using florid language to describe the action." + postfix, nil
 	case Curse:
-		return prefix + "revolving around a curse. " + postfix, nil
+		return prefix + "revolving around a curse." + postfix, nil
 	case Creature:
-		return prefix + "revolving around a unique mythical creature. " + postfix, nil
+		return prefix + "revolving around a newly created mythical creature." + postfix, nil
+	case AntiHumor:
+		return "Describe a story using antihumor. Nothing funny should happen and the story should neither acknowledge that it is not funny nor that there was the expectation of humor." + postfix, nil
 	}
 	return "", fmt.Errorf("unknown story type %v", storyType)
 }
