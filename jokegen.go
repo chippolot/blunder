@@ -12,10 +12,9 @@ import (
 )
 
 //go:embed res/nouns.txt
-//go:embed res/misunderstanding/styles.txt
+//go:embed res/styles.txt
+//go:embed res/modifiers.txt
 //go:embed res/misunderstanding/modifiers.txt
-//go:embed res/slapstick/styles.txt
-//go:embed res/slapstick/modifiers.txt
 var ResourcesFS embed.FS
 
 type StoryDataType int
@@ -81,7 +80,7 @@ type StoryDataProvider interface {
 }
 
 func getPrompt(storyType StoryType) (string, error) {
-	const prefix string = "Describe to me a highly comical situation "
+	const prefix string = "Describe a highly comical situation "
 	const postfix string = " The theme should be '%v'%v. Write the description in the style of %v and limit the length to 500 characters."
 
 	switch storyType {
@@ -94,7 +93,7 @@ func getPrompt(storyType StoryType) (string, error) {
 	case Creature:
 		return prefix + "revolving around a newly created mythical creature." + postfix, nil
 	case AntiHumor:
-		return "Describe a story using antihumor. Nothing funny should happen and the story should neither acknowledge that it is not funny nor that there was the expectation of humor." + postfix, nil
+		return "Describe a situation using anti-humor, defined as content presented in an otherwise comedic fashion but which is totally lacking in humor or payoff." + postfix, nil
 	}
 	return "", fmt.Errorf("unknown story type %v", storyType)
 }

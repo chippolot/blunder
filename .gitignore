@@ -28,3 +28,4 @@ go.work
 
 *.db
 recent_story.json
+.env

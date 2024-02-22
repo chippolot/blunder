@@ -2,70 +2,40 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
-	"time"
+	"slices"
 
 	"github.com/chippolot/jokegen"
 )
 
 const (
-	ThemesFilePath      = "res/nouns.txt"
-	StylesFilePath      = "res/%s/styles.txt"
-	ModifiersFilePath   = "res/%s/modifiers.txt"
-	CachedStoryFilePath = "recent_story.json"
+	ThemesFileName    = "nouns.txt"
+	StylesFileName    = "styles.txt"
+	ModifiersFileName = "modifiers.txt"
 )
 
 type FileDataProvider struct {
 }
 
 func (f *FileDataProvider) AddStory(story, prompt string, storyType jokegen.StoryType) error {
-	result := &jokegen.StoryResult{
-		Story:     story,
-		Prompt:    prompt,
-		Timestamp: time.Now().UTC(),
-	}
-
-	file, err := os.Create(CachedStoryFilePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	err = json.NewEncoder(file).Encode(result)
-	if err != nil {
-		return err
-	}
-
+	// No support for story caching
 	return nil
 }
 
 func (f *FileDataProvider) GetMostRecentStory(storyType jokegen.StoryType) (jokegen.StoryResult, error) {
-	file, err := os.Open(CachedStoryFilePath)
-	if err != nil {
-		return jokegen.StoryResult{}, err
-	}
-	defer file.Close()
-
-	var result jokegen.StoryResult
-	if err := json.NewDecoder(file).Decode(&result); err != nil {
-		return jokegen.StoryResult{}, err
-	}
-
-	return result, nil
+	// No support for story caching
+	return jokegen.StoryResult{}, fmt.Errorf("no recent story available")
 }
 
 func (f *FileDataProvider) GetRandomString(dataType jokegen.StoryDataType, storyType jokegen.StoryType) (string, error) {
-	filePath, err := getFilePath(dataType, storyType)
+	filename, err := getFilename(dataType)
 	if err != nil {
-		return "", err
+		return "", nil
 	}
-	lines, err := readLines(filePath)
-	if err != nil {
-		return "", err
-	}
+	storyTypeStr, _ := storyType.ToString()
+
+	lines := slices.Concat(readLines(fmt.Sprintf("res/%s", filename)), readLines(fmt.Sprintf("res/%s/%s", storyTypeStr, filename)))
 	if len(lines) == 0 {
 		return "", nil
 	}
@@ -77,27 +47,22 @@ func (f *FileDataProvider) Close() error {
 	return nil
 }
 
-func getFilePath(dataType jokegen.StoryDataType, storyType jokegen.StoryType) (string, error) {
-	storyTypeString, err := storyType.ToString()
-	if err != nil {
-		return "", err
-	}
-
+func getFilename(dataType jokegen.StoryDataType) (string, error) {
 	switch dataType {
 	case jokegen.Themes:
-		return ThemesFilePath, nil
+		return ThemesFileName, nil
 	case jokegen.Styles:
-		return fmt.Sprintf(StylesFilePath, storyTypeString), nil
+		return StylesFileName, nil
 	case jokegen.Modifiers:
-		return fmt.Sprintf(ModifiersFilePath, storyTypeString), nil
+		return ModifiersFileName, nil
 	}
 	return "", fmt.Errorf("unknown data type: %v", dataType)
 }
 
-func readLines(path string) ([]string, error) {
+func readLines(path string) []string {
 	file, err := jokegen.ResourcesFS.Open(path)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 	defer file.Close()
 
@@ -106,5 +71,5 @@ func readLines(path string) ([]string, error) {
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
-	return lines, scanner.Err()
+	return lines
 }

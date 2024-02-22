@@ -1,8 +1,9 @@
 module github.com/chippolot/jokegen
 
-go 1.21.7
+go 1.22
 
 require (
+	github.com/joho/godotenv v1.5.1
 	github.com/sashabaranov/go-openai v1.19.4
 	github.com/urfave/cli/v2 v2.27.1
 )
